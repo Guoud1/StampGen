@@ -1,6 +1,6 @@
-# Сборка StampGen в готовый EXE (для распространения)
+# Сборка StampGen в готовый EXE
 
-## Windows (основной вариант для «простых пользователей»)
+## Windows
 
 Нужен установленный [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0)
 (или просто SDK — рантайм включается в exe автоматически).
