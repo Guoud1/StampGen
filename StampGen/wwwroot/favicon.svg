@@ -1,0 +1,8 @@
+<!-- Оригинальная иконка StampGen (c) Guoud — нарисована специально для проекта,
+     сторонняя графика не используется. Пластина с фаской 45° + монограмма S. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+  <rect x="8" y="8" width="240" height="240" rx="52" fill="#173a7a"/>
+  <path d="M44 64 H176 L212 100 V192 H44 Z" fill="#e2e6ee" stroke="#d6dbe2" stroke-width="2"/>
+  <path d="M58 78 H166 L198 110 V178 H58 Z" fill="none" stroke="#173a7a" stroke-opacity="0.59" stroke-width="5"/>
+  <text x="124" y="166" font-family="DejaVu Sans, Arial, Helvetica, sans-serif" font-size="96" font-weight="700" text-anchor="middle" fill="#173a7a">S</text>
+</svg>

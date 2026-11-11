@@ -1,0 +1,20 @@
+# .NET build results
+bin/
+obj/
+publish/
+artifacts/
+
+# Visual Studio / Rider / VS Code
+.vs/
+.idea/
+*.user
+*.suo
+*.DotSettings.user
+
+# Библиотеки штампов пользователя (создаются рядом с exe при работе)
+stamp/
+
+# Системное
+*.log
+.DS_Store
+Thumbs.db

@@ -1,0 +1,30 @@
+<?xml version='1.0'?>
+<!-- ============================================================
+     Obfuscar-конфиг StampGen v2.2 — защита IL от реверс-инженеринга.
+     Запуск:  .\build-exe.ps1 -Obfuscate   (или вручную:
+     dotnet publish ... -p:PublishSingleFile=false, затем
+     obfuscar.console obfuscar.xml  — нужен  dotnet tool install -g
+     Obfuscar.GlobalTool). Готовый обфусцированный StampGen.dll ложится
+     в publish\win-x64, exe и wwwroot остаются рядом.
+     ВАЖНО: публичное API и имена свойств/полей НЕ переименовываются
+     (Blazor-компоненты, JSInvokable, System.Text.Json и проекты
+     .stampgen завязаны на имена) — обфусцируются приватные члены,
+     а строковые литералы шифруются (HideStrings).
+     ============================================================ -->
+<Obfuscator>
+  <Var name="InPath" value="publish/win-x64" />
+  <Var name="OutPath" value="publish/win-x64-obf" />
+  <!-- Консервативный режим: ничего не ломаем, только прячем внутренности -->
+  <Var name="KeepPublicApi" value="true" />
+  <Var name="HidePrivateApi" value="true" />
+  <Var name="RenameProperties" value="false" />
+  <Var name="RenameFields" value="false" />
+  <Var name="RenameEvents" value="false" />
+  <Var name="HideStrings" value="true" />
+  <Var name="ReuseNames" value="false" />
+  <Var name="UseUnicodeNames" value="false" />
+  <Var name="UseKoreanNames" value="false" />
+  <Var name="MarkedOnly" value="false" />
+  <!-- Обфусцируем только сборку программы; сторонние библиотеки не трогаем -->
+  <Module file="$(InPath)/StampGen.dll" />
+</Obfuscator>

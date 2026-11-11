@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<!-- StampGen — корневой компонент. © Guoud (iljamakeev@yandex.ru). Условия: LICENSE.md. -->
+<html lang="ru">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <base href="/" />
+    <ResourcePreloader />
+    <link rel="stylesheet" href="@Assets["lib/bootstrap/dist/css/bootstrap.min.css"]" />
+    <link rel="stylesheet" href="@Assets["app.css"]" />
+    <link rel="stylesheet" href="@Assets["StampGen.styles.css"]" />
+    <!-- v2.1.2: оригинальная иконка (пластина с фаской + монограмма S) вместо дефолтной иконки Blazor -->
+    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+    <link rel="icon" type="image/png" sizes="64x64" href="favicon.png" />
+    <HeadOutlet @rendermode="InteractiveServer" />
+</head>
+
+<body>
+    <Routes @rendermode="InteractiveServer" />
+    <script src="@Assets["_framework/blazor.web.js"]"></script>
+    <script src="@Assets["js/interop.js"]"></script>
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "./lib/three/three.module.min.js"
+            }
+        }
+    </script>
+    <script type="module" src="@Assets["js/viewer3d.js"]"></script>
+</body>
+
+</html>

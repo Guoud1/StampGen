@@ -1,0 +1,17 @@
+DejaVu Fonts (DejaVuSans.ttf, DejaVuSans-Bold.ttf)
+--------------------------------------------------
+Copyright (c) 2003 by Bitstream, Inc. All Rights Reserved.
+Bitstream Vera is a trademark of Bitstream, Inc.
+DejaVu changes are in public domain.
+License: Bitstream Vera (пермиссивная; разрешено использование и
+распространение в составе ПО, включая коммерческое).
+Полный текст: https://dejavu-fonts.github.io/License.html
+
+Liberation Fonts (LiberationSans/Serif/Mono *.ttf)
+--------------------------------------------------
+Copyright (c) 2012 Red Hat, Inc.
+Licensed under the SIL Open Font License, Version 1.1.
+Полный текст: https://opensource.org/licenses/OFL-1.1
+
+Оба семейства шрифтов поставляются вместе с StampGen для функции
+«текстовый оттиск». Файлы лежат в wwwroot/fonts.

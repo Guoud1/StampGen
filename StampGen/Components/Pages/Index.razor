@@ -1,0 +1,858 @@
+@page "/"
+@namespace StampGen.Components.Pages
+@implements IDisposable
+
+<div class="app-shell">
+    <!-- ==================== v1.8: МЕНЮБАР «КАК У ВЗРОСЛЫХ» ==================== -->
+    <div class="menubar">
+        <div class="menu">
+            <button class="menu-btn @(_openMenu == "file" ? "open" : "")" @onclick="@(() => ToggleMenu("file"))">Файл</button>
+            @if (_openMenu == "file")
+            {
+                <div class="menu-drop">
+                    <button class="menu-item" @onclick="MenuNew">Новый <span class="menu-hint">создать проект</span></button>
+                    <button class="menu-item" @onclick="MenuSave">Сохранить <span class="menu-hint">.stampgen</span></button>
+                    <button class="menu-item" @onclick="MenuSaveAs">Сохранить как… <span class="menu-hint">svg, pdf, png, jpg</span></button>
+                    <button class="menu-item" @onclick="MenuOpenFile">Открыть… <span class="menu-hint">.stampgen</span></button>
+                </div>
+            }
+        </div>
+        <div class="menu">
+            <button class="menu-btn @(_openMenu == "edit" ? "open" : "")" @onclick="@(() => ToggleMenu("edit"))">Правка</button>
+            @if (_openMenu == "edit")
+            {
+                <div class="menu-drop">
+                    <button class="menu-item" disabled="@(!_canUndo)" @onclick="MenuUndo">Отменить <span class="menu-hint">Ctrl+Z</span></button>
+                    <button class="menu-item" disabled="@(!_canRedo)" @onclick="MenuRedo">Вернуть <span class="menu-hint">Ctrl+Y</span></button>
+                </div>
+            }
+        </div>
+        <div class="menu">
+            <button class="menu-btn @(_openMenu == "libs" ? "open" : "")" @onclick="@(() => ToggleMenu("libs"))">Библиотеки</button>
+            @if (_openMenu == "libs")
+            {
+                <div class="menu-drop">
+                    <button class="menu-item" disabled="@_importBusy" @onclick="MenuAddLibrary">Добавить библиотеку (zip)…</button>
+                    <button class="menu-item" @onclick="MenuManageLibs">Управление библиотеками…</button>
+                    <div class="menu-sep"></div>
+                    <button class="menu-item" @onclick="MenuReloadLibs">Перечитать папку stamp</button>
+                </div>
+            }
+        </div>
+        <!-- v2.2: «О программе» — самостоятельный пункт меню-бара, в один ряд с Файл/Правка/Библиотеки -->
+        <div class="menu">
+            <button class="menu-btn" @onclick="MenuAbout">О программе</button>
+        </div>
+        <div class="menubar-title">StampGen <span class="ver">v2.2.1</span></div>
+        <div class="menubar-proj" title="Текущий проект">@S.ProjectName</div>
+    </div>
+    @if (_openMenu != null)
+    {
+        <!-- подложка ловит клик вне меню и закрывает его -->
+        <div class="menu-overlay" @onclick="CloseMenu"></div>
+    }
+
+    <div class="app">
+    <!-- ==================== ЛЕВАЯ КОЛОНКА: НАСТРОЙКИ ==================== -->
+    <div class="left-col">
+
+        <!-- Проект -->
+        <div class="section">
+            <h6>Проект</h6>
+            <input class="form-control form-control-sm proj-name" placeholder="Имя проекта"
+                   value="@S.ProjectName" @onchange="ProjectNameChanged" />
+            <!-- v1.8: кнопки Новый/Сохранить/Сохранить как/Открыть/О программе переехали в меню «Файл» -->
+
+            @if (_saveAsOpen)
+            {
+                <div class="panel">
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" id="fmt-native" checked="@(_saveAsFormat == FmtNative)" @onchange="() => _saveAsFormat = FmtNative" />
+                        <label class="form-check-label" for="fmt-native">Родной формат (.stampgen, SVG внутри)</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" id="fmt-svg" checked="@(_saveAsFormat == FmtSvg)" @onchange="() => _saveAsFormat = FmtSvg" />
+                        <label class="form-check-label" for="fmt-svg">SVG (вектор, для гравировки)</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" id="fmt-pdf" checked="@(_saveAsFormat == FmtPdf)" @onchange="() => _saveAsFormat = FmtPdf" />
+                        <label class="form-check-label" for="fmt-pdf">PDF (вектор, для гравировки)</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" id="fmt-png" checked="@(_saveAsFormat == FmtPng)" @onchange="() => _saveAsFormat = FmtPng" />
+                        <label class="form-check-label" for="fmt-png">PNG (картинка, без фона)</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" id="fmt-jpg" checked="@(_saveAsFormat == FmtJpg)" @onchange="() => _saveAsFormat = FmtJpg" />
+                        <label class="form-check-label" for="fmt-jpg">JPG (картинка, белый фон)</label>
+                    </div>
+                    <div class="hint">SVG и PDF — одинаковые по содержимому: только оттиски, без рамок и подписей.</div>
+                    <input class="form-control form-control-sm mt-1" placeholder="Имя файла" value="@_saveAsName" @onchange="SaveAsNameChanged" />
+                    <button class="btn btn-sm btn-primary mt-1" @onclick="SaveAsNow">Сохранить файл</button>
+                </div>
+            }
+            @if (_openOpen)
+            {
+                <div class="panel">
+                    <InputFile OnChange="OpenProjectFile" accept=".stampgen,.zip" class="form-control form-control-sm" />
+                    <div class="hint">Открываются только файлы проекта .stampgen</div>
+                    @if (_openError != null)
+                    {
+                        <div class="err">@_openError</div>
+                    }
+                </div>
+            }
+
+            <div class="subhead">Автосохранение</div>
+            <div class="btn-row">
+                <select class="form-select form-select-sm" style="max-width:150px" value="@AutosaveKey" @onchange="AutosaveChanged">
+                    <option value="0">Выключено</option>
+                    <option value="30">Каждые 30 с</option>
+                    <option value="60">Каждую минуту</option>
+                    <option value="300">Каждые 5 минут</option>
+                </select>
+                <span class="hint-inline autosave-status">@_autosaveStatus</span>
+            </div>
+            @if (_autosaveFound)
+            {
+                <div class="panel autosave-panel">
+                    <div>Найдено автосохранение от @_autosaveTime</div>
+                    <div class="hint">Проект: «@_autosaveName»</div>
+                    <div class="btn-row">
+                        <button class="btn btn-sm btn-primary" @onclick="RestoreAutosave">Восстановить</button>
+                        <button class="btn btn-sm btn-outline-secondary" @onclick="DiscardAutosave">Удалить</button>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- Основание -->
+        <div class="section">
+            <h6>Основание (пластина)</h6>
+            <div class="grid3">
+                <label>Ширина, мм
+                    <input type="number" class="form-control form-control-sm" min="5" step="0.5"
+                           @bind="S.Plate.Width" @bind:after="AfterPlateSize" />
+                </label>
+                <label>Глубина, мм
+                    <input type="number" class="form-control form-control-sm" min="5" step="0.5"
+                           @bind="S.Plate.Depth" @bind:after="AfterPlateSize" />
+                </label>
+                <label>Высота, мм
+                    <input type="number" class="form-control form-control-sm" min="1" step="0.5"
+                           @bind="S.Plate.Height" @bind:after="AfterPlateSize" />
+                </label>
+            </div>
+            <div class="hint">Минимум 5x5 мм, высота от 1 мм.</div>
+
+            <div class="form-check mt-1">
+                <input class="form-check-input" type="checkbox" id="topCh" @bind="S.Plate.TopChamfer" @bind:after="AfterPlateSize" />
+                <label class="form-check-label" for="topCh">Фаска сверху (1x1 мм, 45°)</label>
+            </div>
+
+            <div class="subhead">Нижняя кромка</div>
+            <label class="slider-label">Высота: <b>@Fmt(S.Plate.BottomChamferHeight)</b> мм <span class="hint-inline">(макс. @Fmt(S.Plate.MaxBottomChamferHeight)@(S.Plate.TopChamfer ? " — минус 1 мм верхней фаски" : ""))</span></label>
+            <input type="range" class="form-range slim" min="0.1" max="@S.Plate.MaxBottomChamferHeight" step="0.1"
+                   @bind="S.Plate.BottomChamferHeight" @bind:event="oninput" @bind:after="AfterPlateSize" />
+            <label class="slider-label">Угол: <b>@Fmt(S.Plate.BottomChamferAngleDeg)</b>°
+                <span class="hint-inline">@AngleHint</span>
+            </label>
+            <input type="range" class="form-range slim" min="-80" max="80" step="0.5"
+                   @bind="S.Plate.BottomChamferAngleDeg" @bind:event="oninput" @bind:after="AfterPlateSize" />
+            <div class="range-marks"><span>+80 фаска</span><span>0</span><span>кайма −80</span></div>
+
+            <div class="subhead">Поля (по периметру)</div>
+            <!-- v1.3: поля — один параметр на всю подложку, все четыре стороны всегда одинаковые -->
+            <div class="grid3">
+                <label>Поле, мм
+                    <input type="number" class="form-control form-control-sm" min="0" step="0.5"
+                           @bind="S.Plate.Margin" @bind:after="AfterPlateSize" />
+                </label>
+                <label></label>
+                <label></label>
+            </div>
+            <div class="hint">Одно поле для всех четырёх сторон.</div>
+        </div>
+
+        <!-- Рельеф -->
+        <div class="section">
+            <h6>Глубина рельефа (общая)</h6>
+            <div class="btn-row">
+                <div class="btn-group btn-group-sm">
+                    <button class="btn @(S.ReliefUnit == ReliefUnit.Micron ? UnitOn : UnitOff)" @onclick="() => SetReliefUnit(ReliefUnit.Micron)">мкм</button>
+                    <button class="btn @(S.ReliefUnit == ReliefUnit.Mm ? UnitOn : UnitOff)" @onclick="() => SetReliefUnit(ReliefUnit.Mm)">мм</button>
+                </div>
+                <input type="text" class="form-control form-control-sm relief-input" inputmode="decimal"
+                       value="@ReliefText" @onchange="ReliefChanged" />
+            </div>
+            @if (_reliefMsg != null)
+            {
+                <div class="err">@_reliefMsg</div>
+            }
+            <!-- v1.4: подсказки сокращены по просьбе автора -->
+            <div class="btn-row mt-2">
+                <button class="btn btn-sm btn-outline-secondary" @onclick="DoResetPositions">Сбросить положение оттисков</button>
+            </div>
+            <div class="btn-row mt-1">
+                <button class="btn btn-sm btn-outline-secondary" style="flex:1" @onclick="DoAutoArrange">Авто-расстановка</button>
+                <!-- v1.3: минимальный зазор между оттисками при авторасстановке -->
+                <label class="hint-inline" style="white-space:nowrap">зазор, мм
+                    <input type="number" class="form-control form-control-sm" style="width:80px;display:inline-block;margin-left:4px"
+                           min="0" max="50" step="0.5" @bind="S.ArrangeGap" @bind:after="ArrangeGapChanged" />
+                </label>
+            </div>
+            <div class="hint">Раскладывает все оттиски (с копиями) с этим зазором.</div>
+        </div>
+
+        <!-- Предупреждения -->
+        @if (S.Warnings.Count > 0)
+        {
+            <div class="section warnbox">
+                @foreach (var w in S.Warnings)
+                {
+                    <div>⚠ @w</div>
+                }
+            </div>
+        }
+
+        <!-- Оттиски -->
+        <div class="section grow">
+            <h6>Оттиски (@S.Stamps.Count)</h6>
+            <div class="btn-row">
+                <button class="btn btn-sm btn-primary" style="flex:1" @onclick="OpenAdd">+ Добавить оттиск</button>
+                <button class="btn btn-sm btn-outline-primary" @onclick="AddTextStamp" title="Текстовая надпись (подпись модели)">Т +</button>
+            </div>
+
+            <!-- v1.7: библиотеки штампов. v1.8: кнопки «Добавить штампы» и «Библиотеки»
+                 переехали в меню «Библиотеки» (вверху окна) — без дублей -->
+            <InputFile id="lib-zip-input" accept=".zip" style="display:none" OnChange="ImportLibraryZip" />
+            @if (_importBusy)
+            {
+                <div class="hint mt-1">Импорт библиотеки…</div>
+            }
+
+            <!-- v1.5: быстрые действия по списку оттисков -->
+            <div class="btn-row mt-1">
+                <button class="btn btn-sm btn-outline-secondary" @onclick="CollapseAll" title="Свернуть окна свойств всех оттисков">Свернуть все</button>
+                <button class="btn btn-sm btn-outline-secondary" @onclick="ExpandAll" title="Развернуть окна свойств всех оттисков">Развернуть все</button>
+            </div>
+            <div class="btn-row mt-1">
+                <button class="btn btn-sm btn-outline-secondary" @onclick="SelectAllStamps" title="Выбрать все оттиски для массового изменения">Выделить все</button>
+                <button class="btn btn-sm btn-outline-secondary" @onclick="ClearBatch" title="Снять выбор со всех оттисков">Снять выделение</button>
+            </div>
+
+            <!-- v1.3: мульти-выбор — галочки у карточек; правки параметра применяются ко всем выбранным.
+                 v1.5: выбрать/снять можно и Ctrl+кликом по оттиску на 2D-схеме; Delete удаляет выбранные.
+                 v1.6: панель-уведомление «Выбрано: …» убрана — есть кнопки выше. -->
+
+            @foreach (var st in S.Stamps)
+            {
+                var stv = st;
+                <div class="stamp-card @OpenClass(stv) @SelClass(stv) @FlashClass(stv) @BatchClass(stv)" id="card-@stv.Id">
+                    <div class="stamp-head" @onclick="() => ToggleExpand(stv)">
+                        <input type="checkbox" class="form-check-input batch-chk" title="Выбрать для массового изменения параметров"
+                               checked="@_batchSel.Contains(stv.Id)"
+                               @onchange="e => ToggleBatch(stv, e)"
+                               @onclick="() => { }" @onclick:stopPropagation="true" />
+                        <span class="chev">@(stv.Expanded ? ChevDown : ChevRight)</span>
+                        @if (stv.Kind == StampKind.Text)
+                        {
+                            <span class="thumb thumb-text" title="Текстовый оттиск">Т</span>
+                        }
+                        else
+                        {
+                            <img class="thumb" src="@ThumbUrl(stv)" alt="" />
+                        }
+                        <span class="stamp-name" title="@stv.DisplayName">@stv.DisplayName</span>
+                        <span class="stamp-size">@(Fmt(stv.Width))x@(Fmt(stv.Height))</span>
+                        <button class="btn-x" title="Удалить оттиск" @onclick="() => RemoveStamp(stv.Id)">✕</button>
+                    </div>
+                    @if (stv.Expanded)
+                    {
+                        <div class="stamp-body">
+                            @if (stv.Kind == StampKind.Text)
+                            {
+                                <div class="subhead">Текст</div>
+                                <input class="form-control form-control-sm" placeholder="Надпись на пластине"
+                                       value="@stv.Text" @onchange="e => TextChanged(stv, e)" />
+                                <div class="grid3 mt-1">
+                                    <label>Шрифт
+                                        <select class="form-select form-select-sm" value="@stv.FontKey" @onchange="e => FontChanged(stv, e)">
+                                            @foreach (var f in TextGlyphs.Fonts)
+                                            {
+                                                <option value="@f.Key">@f.Title</option>
+                                            }
+                                        </select>
+                                    </label>
+                                    <label>Начертание
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" @bind="stv.TextBold" @bind:after="() => TextStyleChanged(stv)" />
+                                            <span class="hint-inline">жирный</span>
+                                        </div>
+                                    </label>
+                                    <div></div>
+                                </div>
+                                @if (_stampMsgs.TryGetValue(stv.Id, out var tmsg))
+                                {
+                                    <div class="err">@tmsg</div>
+                                }
+                            }
+
+                            <label class="slider-label">Ширина: <b>@Fmt(stv.Width)</b> мм <span class="hint-inline">(колесо мыши — когда слайдер в фокусе)</span></label>
+                            <!-- v1.3: слайдер меняет размер онлайн, уменьшение работает, минимум 0.035 мм;
+                                 снимок для undo берётся ДО изменения (ручной @oninput). В 3D применяем кнопкой «Обновить» -->
+                            <input type="range" class="form-range slim wheel-step" min="@StampItem.MinSize" max="@Math.Max(StampItem.MinSize * 2, WorkW)" step="0.005" value="@stv.Width"
+                                   @oninput="e => WidthInput(stv, e)" />
+                            <label class="slider-label">Высота: <b>@Fmt(stv.Height)</b> мм</label>
+                            <input type="range" class="form-range slim wheel-step" min="@StampItem.MinSize" max="@Math.Max(StampItem.MinSize * 2, WorkH)" step="0.005" value="@stv.Height"
+                                   @oninput="e => HeightInput(stv, e)" />
+                            <div class="grid3">
+                                <label>Ширина, мм
+                                    <input type="number" class="form-control form-control-sm" min="@StampItem.MinSize" step="0.1" value="@stv.Width" @onchange="e => WidthInput(stv, e)" />
+                                </label>
+                                <label>Высота, мм
+                                    <input type="number" class="form-control form-control-sm" min="@StampItem.MinSize" step="0.1" value="@stv.Height" @onchange="e => HeightInput(stv, e)" />
+                                </label>
+                                <label>Пропорции
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" @bind="stv.KeepProportions" @bind:after="() => AfterPropToggle(stv)" />
+                                        <span class="hint-inline">сохранять</span>
+                                    </div>
+                                </label>
+                            </div>
+                            <div class="hint">Минимальный размер @Fmt(StampItem.MinSize) мм. При пропорциях ведущее поле — то, которое меняете.</div>
+
+                            <div class="subhead">Положение</div>
+                            <div class="hint" style="margin:0 0 3px 0">Оттиск можно тащить мышью по 2D-схеме; клик открывает это окно.</div>
+                            <label class="slider-label">Сдвиг по горизонтали: <b>@Fmt(stv.PosX)</b> мм</label>
+                            <input type="range" class="form-range slim" min="0" max="@MaxPosX(stv)" step="0.1" value="@stv.PosX" @oninput="e => PosXInput(stv, e)" />
+                            <label class="slider-label">Сдвиг по вертикали: <b>@Fmt(stv.PosY)</b> мм</label>
+                            <input type="range" class="form-range slim" min="0" max="@MaxPosY(stv)" step="0.1" value="@stv.PosY" @oninput="e => PosYInput(stv, e)" />
+                            <div class="hint">Оси — оси пластины; позиция — левый-верх угол бокса.</div>
+                            <label class="slider-label">Угол: <b>@Fmt(stv.RotationDeg)</b>°</label>
+                            <input type="range" class="form-range slim" min="0" max="360" step="0.5" value="@stv.RotationDeg" @oninput="e => RotInput(stv, e)" />
+                            <div class="range-marks"><span>0</span><span>90</span><span>180</span><span>270</span><span>360</span></div>
+                            <div class="hint">Габарит с поворотом: <b>@(Fmt(BboxW(stv)))x@(Fmt(BboxH(stv)))</b> мм.</div>
+                            <div class="btn-row">
+                                <button class="btn btn-sm btn-outline-secondary" @onclick="() => Mirror(stv)">@MirrorLabel(stv)</button>
+                            </div>
+
+                            <div class="subhead">Рельеф этого оттиска</div>
+                            <label>Глубина, @(S.ReliefUnit == ReliefUnit.Micron ? "мкм" : "мм")
+                                <input type="text" class="form-control form-control-sm" inputmode="decimal" placeholder="общая (@DepthGlobalText)"
+                                       value="@DepthText(stv)" @onchange="e => DepthChanged(stv, e)" />
+                            </label>
+                            <div class="form-check mt-1">
+                                <input class="form-check-input" type="checkbox" id="rough-@stv.Id" @bind="stv.RoughBottom" @bind:after="N" />
+                                <label class="form-check-label" for="rough-@stv.Id">Шершавое дно (рельеф на дне оттиска)</label>
+                            </div>
+                            @if (stv.RoughBottom)
+                            {
+                                <label>Дельта шероховатости, мкм
+                                    <input type="number" class="form-control form-control-sm" min="1" max="1000" step="1"
+                                           @bind="stv.RoughDeltaUm" @bind:after="() => AfterRough(stv)" />
+                                </label>
+                            }
+                            @if (_stampMsgs.TryGetValue(stv.Id, out var dmsg))
+                            {
+                                <div class="err">@dmsg</div>
+                            }
+
+                            <div class="subhead">Копии</div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="cp-@stv.Id" @bind="stv.CopiesEnabled" @bind:after="() => AfterCopiesToggle(stv)" />
+                                <label class="form-check-label" for="cp-@stv.Id">Сделать копии</label>
+                            </div>
+                            @if (stv.CopiesEnabled)
+                            {
+                                <div class="grid3">
+                                    <label>Копий
+                                        <input type="number" class="form-control form-control-sm" min="1" max="200" step="1" @bind="stv.CopiesCount" @bind:after="() => AfterCopies(stv)" />
+                                    </label>
+                                    <label>Шаг размера
+                                        <input type="number" class="form-control form-control-sm" min="0" step="0.1" @bind="stv.CopiesStep" @bind:after="() => AfterCopies(stv)" />
+                                    </label>
+                                    <label>Ед. шага
+                                        <select class="form-select form-select-sm" value="@CopyUnit(stv)" @onchange="e => CopyUnitChanged(stv, e)">
+                                            <option value="mm">мм</option>
+                                            <option value="%">%</option>
+                                        </select>
+                                    </label>
+                                    <label>Расстояние, мм
+                                        <input type="number" class="form-control form-control-sm" min="0" step="0.1" @bind="stv.CopiesSpacing" @bind:after="() => AfterCopies(stv)" />
+                                    </label>
+                                    <label>Угол ряда, °
+                                        <input type="number" class="form-control form-control-sm" min="0" max="360" step="0.5" @bind="stv.RowAngleDeg" @bind:after="() => AfterRowAngle(stv)" />
+                                    </label>
+                                </div>
+                                <input type="range" class="form-range slim" min="0" max="360" step="0.5" @bind="stv.RowAngleDeg" @bind:after="() => AfterRowAngle(stv)" />
+                                <div class="range-marks"><span>0</span><span>90</span><span>180</span><span>270</span><span>360</span></div>
+                                <div class="hint">Расстояние — край-к-краю по направлению ряда.</div>
+                            }
+
+                            <button class="btn btn-sm btn-outline-danger mt-2" @onclick="() => RemoveStamp(stv.Id)">Удалить оттиск из проекта</button>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+
+        <!-- Создать STL -->
+        <div class="section">
+            <button class="btn btn-success w-100" @onclick="OpenStl">Создать STL</button>
+        </div>
+    </div>
+
+    <!-- ==================== ПРАВАЯ КОЛОНКА: ВИЗУАЛИЗАЦИЯ ==================== -->
+    <div class="right-col">
+        <div class="view-toolbar">
+            <div class="btn-group btn-group-sm">
+                <button class="btn @(S.Is3D ? UnitOff : UnitOn)" @onclick="() => SetView(false)">2D</button>
+                <button class="btn @(S.Is3D ? UnitOn : UnitOff)" @onclick="() => SetView(true)">3D</button>
+            </div>
+            <!-- v1.8: undo/redo в тулбаре — всегда под рукой -->
+            <button class="btn btn-sm btn-outline-secondary tb-undo" disabled="@(!_canUndo)" @onclick="Undo" title="Отменить последнее действие (Ctrl+Z)">⟲</button>
+            <button class="btn btn-sm btn-outline-secondary tb-undo" disabled="@(!_canRedo)" @onclick="Redo" title="Вернуть отменённое (Ctrl+Y)">⟳</button>
+            @if (S.Is3D)
+            {
+                <label class="slider-label q-label">Качество: <b>@QualityName</b></label>
+                <input type="range" class="form-range slim q-range" min="1" max="4" step="1" @bind="S.Quality" @bind:after="N" />
+                <label class="slider-label q-label">Усиление рельефа: <b>x@(S.ReliefExaggeration.ToString("0"))</b> <span class="hint-inline">(x1 — как напечатается)</span></label>
+                <!-- v2.1: знак умножения заменён на латинскую x (просьба владельца: × читался как «ч»); усиление от x1 — реальная глубина печати -->
+                <input type="range" class="form-range slim q-range" min="1" max="200" step="1" @bind="S.ReliefExaggeration" @bind:event="oninput" @bind:after="N" />
+                <button class="btn btn-sm btn-primary" disabled="@_viewBusy" @onclick="Update3D">
+                    @(_viewBusy ? "Строю…" : "Обновить")
+                </button>
+            }
+            <span class="dirty">@DirtyText</span>
+            <!-- v1.8: предупреждение — аккуратная строка под панелью вместо громоздкого жёлтого блока -->
+            @if (S.Is3D)
+            {
+                <div class="warn3d" title="Программа продолжает отвечать во время построения — расчёт идёт на вашем ПК">
+                    ⚠ Модель строится по кнопке «Обновить» (на слабом ПК — до нескольких минут): программа не зависла. Готовая модель хранится до следующего «Обновить» — переключение 2D/3D мгновенное.
+                </div>
+                @if (_plateOnly3d && !_viewBusy && _viewError == null)
+                {
+                    <div class="hint3d">Сейчас показана только пластина. Нажмите «Обновить», чтобы построить модель с оттисками.</div>
+                }
+            }
+        </div>
+        <div class="viewport">
+            <canvas id="canvas2d" style="@CanvasDisplay"></canvas>
+            <div id="view3d" style="@View3dDisplay"></div>
+            @* v1.6: оверлей построения 3D — анимация «программа не зависла» + отмена *@
+            @if (S.Is3D && _viewBusy)
+            {
+                <div class="view3d-overlay">
+                    <div class="ovl-card">
+                        <div class="stl-spinner"></div>
+                        <div class="ovl-title">Строим 3D-модель на сервере приложения…</div>
+                        <div class="progress mt-1" style="height:14px">
+                            <div class="progress-bar progress-bar-striped progress-bar-animated" style="width:@ViewPct%" role="progressbar"></div>
+                        </div>
+                        <div class="ovl-phase">@_viewPhase</div>
+                        <div class="hint">Работаем: @_viewElapsed — программа не зависла, идёт расчёт геометрии.</div>
+                        <button class="btn btn-sm btn-outline-danger mt-1" @onclick="CancelView3d">Отменить</button>
+                    </div>
+                </div>
+            }
+            @if (S.Is3D && _viewError != null)
+            {
+                <div class="view3d-overlay">
+                    <div class="ovl-card ovl-err">
+                        <div class="ovl-title">⚠ Не получилось построить 3D-модель</div>
+                        <div>@_viewError</div>
+                        <button class="btn btn-sm btn-primary mt-2" @onclick="DismissView3dError">Понятно</button>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- ==================== МОДАЛКА: ДОБАВИТЬ ОТТИСКИ ==================== -->
+@if (_addOpen)
+{
+    <div class="modal-back">
+        <div class="modal-card modal-wide">
+            <div class="modal-head">Добавить оттиски <button class="btn-x" @onclick="CloseAdd">✕</button></div>
+            <div class="modal-body">
+                @if (Lib.Libraries.Count == 0)
+                {
+                    <!-- v1.7: программа стартует без штампов — нужна библиотека -->
+                    <div class="warnbox" style="margin-bottom:8px">
+                        <div>Штампов пока нет. Добавьте их zip-архивом (кнопка ниже) — библиотека сохранится навсегда: папка «stamp» рядом с программой.</div>
+                    </div>
+                    <div class="btn-row">
+                        <button class="btn btn-sm btn-primary" disabled="@_importBusy" @onclick="AddStampsClick">Импортировать библиотеку zip…</button>
+                    </div>
+                }
+                else
+                {
+                    <!-- v1.8: «Все библиотеки» — все оттиски программы, разделённые по категориям -->
+                    <div class="btn-row">
+                        <select class="form-select form-select-sm" value="@_selLib" @onchange="SelectLibChanged">
+                            <option value="@SelAllLibsValue">Все библиотеки</option>
+                            @foreach (var l in Lib.Libraries)
+                            {
+                                <option value="@l.Id">@l.Name</option>
+                            }
+                        </select>
+                        <select class="form-select form-select-sm" value="@_selCat" @onchange="SelectCatChanged">
+                            <option value="">Все категории</option>
+                            @foreach (var c in CategoriesForView())
+                            {
+                                <option value="@c">@c</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="hint">@(string.IsNullOrEmpty(_selCat) ? "Показаны все категории" : "Категория: " + _selCat) · всего доступно: @StampsForView().Count</div>
+
+                    <div class="icon-grid">
+                        @foreach (var ic in StampsForView())
+                        {
+                            <div class="@IconCellClass(ic)" title="@StampTitle(ic)" @onclick="() => ToggleSelect(ic.SvgPath)">
+                                <img src="@StampLibrary.PreviewUrl(ic.SvgPath)" loading="lazy" alt="@ic.Name" />
+                            </div>
+                        }
+                    </div>
+                }
+
+                @if (_selected.Count > 0)
+                {
+                    <div class="subhead">Выбрано: @_selected.Count</div>
+                    <div class="chips">
+                        @foreach (var sel in _selected)
+                        {
+                            if (sel.StartsWith("custom:", StringComparison.Ordinal))
+                            {
+                                var cp = _customPending.FirstOrDefault(c => CustomPrefix + c.TempId == sel);
+                                if (cp != null)
+                                {
+                                    <div class="chip" title="@cp.Name">
+                                        <img src="@cp.DataUrl" alt="" />
+                                        <span>@cp.Name</span>
+                                        <button class="btn-x" @onclick="() => RemovePending(cp.TempId)">✕</button>
+                                    </div>
+                                }
+                            }
+                            else if (_pathIndex.TryGetValue(sel, out var inf))
+                            {
+                                <div class="chip" title="@inf.Name">
+                                    <img src="@StampLibrary.PreviewUrl(inf.SvgPath)" alt="" />
+                                    <span>@inf.Name</span>
+                                    <button class="btn-x" @onclick="() => ToggleSelect(sel)">✕</button>
+                                </div>
+                            }
+                        }
+                    </div>
+                }
+
+                <div class="subhead">Свой SVG</div>
+                <InputFile OnChange="UploadSvg" accept=".svg,image/svg+xml" multiple class="form-control form-control-sm" />
+                <div class="hint">SVG переводится в ч/б.</div>
+                @if (_addMessages.Count > 0)
+                {
+                    <div class="msgbox">
+                        @foreach (var m in _addMessages.Take(10))
+                        {
+                            <div>@m</div>
+                        }
+                    </div>
+                }
+            </div>
+            <div class="modal-foot">
+                <button class="btn btn-sm btn-outline-secondary" @onclick="CloseAdd">Отмена</button>
+                <button class="btn btn-sm btn-primary" disabled="@(_selected.Count == 0)" @onclick="AddSelectedToProject">
+                    Добавить выбранные в проект (@_selected.Count)
+                </button>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- ==================== МОДАЛКА: СОЗДАТЬ STL ==================== -->
+@if (_stlOpen)
+{
+    <div class="modal-back">
+        <div class="modal-card">
+            <div class="modal-head">Создать STL <button class="btn-x" @onclick="CloseStl">✕</button></div>
+            <div class="modal-body">
+                <div class="warnbox" style="margin-bottom:8px">
+                    <div>⚠ Расчёт делает программа (ваш ПК), а не браузер — страница не должна «зависать».</div>
+                    <div>После «Сохранить» будет видно, что идёт работа: программа не зависла. На слабом ПК при высоком качестве расчёт идёт до нескольких минут.</div>
+                    @if (S.Plate.TopChamfer)
+                    {
+                        <div>Верхняя фаска 1x1 мм будет добавлена в геометрию по всему периметру верхней грани.</div>
+                    }
+                </div>
+                <label>Имя файла
+                    <input class="form-control form-control-sm" value="@_stlName" @onchange="StlNameChanged" />
+                </label>
+                <label>Качество (детализация)
+                    <select class="form-select form-select-sm" value="@_stlQuality.ToString()" @onchange="StlQualityChanged">
+                        <option value="1">Черновик (быстро)</option>
+                        <option value="2">Среднее</option>
+                        <option value="3">Высокое</option>
+                        <option value="4">Ультра (медленно, высокая детализация)</option>
+                    </select>
+                </label>
+                <div class="hint">@StlEstimateText</div>
+
+                @if (_stlBusy || _stlProgress > 0)
+                {
+                    <div class="stl-working @(_stlBusy ? "active" : "")">
+                        <div class="stl-spinner"></div>
+                        <div class="stl-work-info">
+                            <div class="stl-phase">@_stlPhase</div>
+                            <div class="progress mt-1" style="height:14px">
+                                <div class="@ProgressBarClass" style="width:@PctProgress%" role="progressbar"></div>
+                            </div>
+                            <div class="hint">@_stlStatus</div>
+                            @if (_stlBusy)
+                            {
+                                <div class="stl-elapsed">Работаем: @_stlElapsedText — программа не зависла, идёт расчёт.</div>
+                                <button class="btn btn-sm btn-outline-danger mt-1" @onclick="CancelStl">Отменить</button>
+                            }
+                        </div>
+                    </div>
+                }
+                else if (!string.IsNullOrEmpty(_stlStatus))
+                {
+                    <div class="hint mt-1">@_stlStatus</div>
+                }
+            </div>
+            <div class="modal-foot">
+                <button class="btn btn-sm btn-outline-secondary" disabled="@_stlBusy" @onclick="CloseStl">@(_stlDone ? "Закрыть" : "Отмена")</button>
+                @if (_stlDone)
+                {
+                    <!-- v1.5: файл скачан — закрываем окно кнопкой «Готово» -->
+                    <button class="btn btn-sm btn-primary" @onclick="CloseStl">Готово</button>
+                }
+                else
+                {
+                    <button class="btn btn-sm btn-success" disabled="@(_stlBusy || S.Stamps.Count == 0)" @onclick="StartStl">Сохранить</button>
+                }
+            </div>
+        </div>
+    </div>
+}
+
+<!-- ==================== МОДАЛКА: БИБЛИОТЕКИ ШТАМПОВ (v1.7) ==================== -->
+@if (_libsOpen)
+{
+    <div class="modal-back">
+        <div class="modal-card modal-wide">
+            <div class="modal-head">Библиотеки штампов <button class="btn-x" @onclick="CloseLibs">✕</button></div>
+            <div class="modal-body">
+                <div class="hint" style="margin-top:0">
+                    Библиотеки лежат в папке «stamp» рядом с программой (zip-архив + папка:
+                    library.json + stamps/*.svg). Штампы можно править вручную в любом
+                    редакторе, затем нажмите «Перечитать папку».
+                    Вложенный архив (zip с zip-библиотеками) тоже можно: каждая внутренняя
+                    библиотека добавится отдельно.
+                </div>
+                <div class="btn-row">
+                    <button class="btn btn-sm btn-primary" disabled="@_importBusy" @onclick="AddStampsClick">Импорт zip…</button>
+                    <button class="btn btn-sm btn-outline-secondary" @onclick="ReloadLibraries">Перечитать папку</button>
+                </div>
+
+                @if (Lib.Libraries.Count == 0)
+                {
+                    <div class="hint mt-1">Библиотек пока нет — программа стартует пустой. Импортируйте zip со штампами.</div>
+                }
+                @foreach (var lib in Lib.Libraries)
+                {
+                    <div class="panel" style="margin-top:8px">
+                        <div><b>@lib.Name</b> <span class="hint-inline">штампов: @lib.StampCount</span></div>
+                        <div class="hint">папка: stamp/@lib.Id/</div>
+                        <div class="btn-row">
+                            <button class="btn btn-sm btn-outline-primary" @onclick="() => ExportLibraryZip(lib.Id)">Экспорт zip</button>
+                            <button class="btn btn-sm btn-outline-danger" @onclick="() => DeleteLibrary(lib.Id)">Удалить</button>
+                        </div>
+                    </div>
+                }
+
+                @if (_importReport != null)
+                {
+                    <div class="@(_importReport.Ok ? "okbox" : "msgbox")" style="margin-top:8px">
+                        @if (_importReport.Ok)
+                        {
+                            <div>Импорт «@_importReport.LibName» завершён: добавлено @_importReport.Added, не удалось @_importReport.Failed.</div>
+                        }
+                        else
+                        {
+                            <div class="err">@_importReport.Error</div>
+                        }
+                        @foreach (var w in _importReport.Warnings.Take(8))
+                        {
+                            <div>@w</div>
+                        }
+                    </div>
+                }
+            </div>
+            <div class="modal-foot">
+                <button class="btn btn-sm btn-primary" @onclick="CloseLibs">Готово</button>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- ==================== МОДАЛКА: НОВЫЙ ПРОЕКТ (v1.7) ==================== -->
+@if (_newOpen)
+{
+    <div class="modal-back">
+        <div class="modal-card">
+            <div class="modal-head">Новый проект <button class="btn-x" @onclick="CancelNew">✕</button></div>
+            <div class="modal-body">
+                <p style="margin-top:0">Создать новый проект? Текущий проект будет заменён пустым.</p>
+                <p style="margin-bottom:0">Сохранить текущий проект перед этим?</p>
+            </div>
+            <div class="modal-foot">
+                <button class="btn btn-sm btn-outline-secondary" @onclick="CancelNew">Отмена</button>
+                <button class="btn btn-sm btn-outline-secondary" @onclick="NewDiscardAndCreate">Не сохранять</button>
+                <button class="btn btn-sm btn-primary" @onclick="NewSaveAndCreate">Сохранить и создать</button>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- ==================== МОДАЛКА: О ПРОГРАММЕ (v1.5) ==================== -->
+@if (_aboutOpen)
+{
+    <div class="modal-back">
+        <div class="modal-card modal-wide">
+            <div class="modal-head">О программе <button class="btn-x" @onclick="() => _aboutOpen = false">✕</button></div>
+            <div class="modal-body about-body">
+                <p style="margin-top:0"><b>StampGen v2.2.1</b> — конструктор оттисков и оснований для печати и гравировки. Все расчёты выполняются локально, на вашем компьютере: интернет не требуется, данные никуда не передаются.</p>
+                <p>Программа бесплатно предоставляется для личного (некоммерческого) использования. Созданные вами проекты (.stampgen) принадлежат вам и могут свободно передаваться другим пользователям.</p>
+                <p>Коммерческое использование, распространение и модификация программы — только с письменного согласия правообладателя <b>Guoud</b>.</p>
+                <p>Лицензия, документация и исходный код: <a href="https://github.com/Guoud1/StampGen" target="_blank" rel="noopener">github.com/Guoud1/StampGen</a></p>
+                <p>☕ <b>Поддержать автора проекта</b> — программа бесплатна, но автора можно угостить кофе: <a href="https://yoomoney.ru/fundraise/1LFSQ49MGAC.261111" target="_blank" rel="noopener">скинуть на кофе (YooMoney)</a></p>
+                <p style="margin-bottom:0"><b>Коммерческое использование и согласование условий:</b><br />email: <b>iljamakeev@yandex.ru</b><br />© Guoud. Все права защищены.</p>
+            </div>
+            <div class="modal-foot">
+                <button class="btn btn-sm btn-primary" @onclick="() => _aboutOpen = false">Понятно</button>
+            </div>
+        </div>
+    </div>
+}
+<!-- /app-shell -->
+</div>
+
+@code {
+    // Значения для атрибутов (без вложенных кавычек в разметке).
+    // Все поля состояния — в Index.razor.cs (partial class).
+
+    public const string FmtNative = "native";
+    public const string FmtSvg = "svg";
+    public const string FmtPdf = "pdf";
+    public const string FmtPng = "png";
+    public const string FmtJpg = "jpg";
+    public const string UnitOn = "btn-primary";
+    public const string UnitOff = "btn-outline-secondary";
+    public const string ChevDown = "▼";
+    public const string ChevRight = "▶";
+    public const string CustomPrefix = "custom:";
+
+    private string AngleHint => S.Plate.BottomChamferAngleDeg > 0 ? "— фаска"
+        : S.Plate.BottomChamferAngleDeg < 0 ? "— кайма" : "— прямой угол";
+
+    // ==================== v1.8: меню-бар ====================
+    // Открытое меню ("file" / "edit" / "libs") или null; подложка .menu-overlay
+    // закрывает меню кликом вне него.
+    public string? _openMenu;
+    private void ToggleMenu(string key) { _openMenu = _openMenu == key ? null : key; StateHasChanged(); }
+    private void CloseMenu() { _openMenu = null; StateHasChanged(); }
+    private void MenuRun(Func<Task> act) { _openMenu = null; _ = act(); StateHasChanged(); }
+    private void MenuRun(Action act) { _openMenu = null; act(); StateHasChanged(); }
+    private Task MenuNew() { MenuRun(OpenNew); return Task.CompletedTask; }
+    private Task MenuSave() { MenuRun(SaveQuick); return Task.CompletedTask; }
+    private Task MenuSaveAs() { MenuRun(ToggleSaveAs); return Task.CompletedTask; }
+    private Task MenuOpenFile() { MenuRun(ToggleOpen); return Task.CompletedTask; }
+    private Task MenuAbout() { MenuRun(() => _aboutOpen = true); return Task.CompletedTask; }
+    private Task MenuUndo() { MenuRun(Undo); return Task.CompletedTask; }
+    private Task MenuRedo() { MenuRun(Redo); return Task.CompletedTask; }
+    private Task MenuAddLibrary() { MenuRun(AddStampsClick); return Task.CompletedTask; }
+    private Task MenuManageLibs() { MenuRun(OpenLibs); return Task.CompletedTask; }
+    private Task MenuReloadLibs() { MenuRun(ReloadLibraries); return Task.CompletedTask; }
+
+    private string AutosaveKey => S.AutosaveSec.ToString();
+
+    private string OpenClass(StampItem st) => st.Expanded ? "open" : "";
+    private string SelClass(StampItem st) => S.SelectedStampId == st.Id ? "sel" : "";
+    private string FlashClass(StampItem st) => _flashCard == st.Id ? "flash" : "";
+    private string BatchClass(StampItem st) => _batchSel.Contains(st.Id) ? "batch" : "";
+    private string IconCellClass(LibStamp st) => _selected.Contains(st.SvgPath) ? "icon-cell sel" : "icon-cell";
+
+    // ==================== v1.8: вкладка «Все библиотеки» ====================
+    // Спец-значение SelAllLibsValue ("ALL", см. Index.razor.cs): показывать оттиски
+    // из ВСЕХ библиотек, разделённые по категориям (плюс «Все категории» сверху).
+    private List<string> CategoriesForView() => _selLib == SelAllLibsValue
+        ? Lib.Libraries.SelectMany(l => Lib.Categories(l.Id)).Distinct()
+            .OrderBy(c => c, StringComparer.Ordinal).ToList()
+        : Lib.Categories(_selLib);
+    private List<LibStamp> StampsForView()
+    {
+        string? cat = string.IsNullOrEmpty(_selCat) ? null : _selCat;
+        if (_selLib != SelAllLibsValue) return Lib.Stamps(_selLib, cat);
+        var res = new List<LibStamp>();
+        foreach (var l in Lib.Libraries)
+            res.AddRange(Lib.Stamps(l.Id, cat));
+        return res;
+    }
+    private string StampTitle(LibStamp st)
+    {
+        var lib = Lib.Library(st.LibId)?.Name ?? st.LibId;
+        return string.IsNullOrEmpty(st.Category) ? st.Name : $"{st.Name} — {lib} / {st.Category}";
+    }
+    private string ThumbUrl(StampItem st) => st.Source == StampSource.Base
+        ? StampLibrary.PreviewUrl(st.SvgPath)   // v1.7: миниатюра — сам svg штампа из библиотеки
+        : _customThumbs.GetValueOrDefault(st.CustomSvgId, "");
+    private string MirrorLabel(StampItem st) => st.Mirrored ? "Вернуть зеркальность" : "Отзеркалить";
+    private string CopyUnit(StampItem st) => st.CopiesStepPercent ? "%" : "mm";
+    private string CanvasDisplay => S.Is3D ? "display:none" : "display:block";
+    private string View3dDisplay => S.Is3D ? "display:block" : "display:none";
+    private string DirtyText => S.Is3D && S.Dirty3D && !_viewBusy && _viewError == null
+        ? "● есть изменения — нажмите «Обновить»" : "";
+    private int ViewPct => (int)Math.Round(_viewPct * 100);
+    private string ProgressBarClass => _stlBusy ? "progress-bar progress-bar-striped progress-bar-animated" : "progress-bar bg-success";
+    private int PctProgress => (int)Math.Round(_stlProgress * 100);
+    private string StlEstimateText => _estSec > 0
+        ? $"Примерное время: около {Math.Ceiling(_estSec)} с. Глубина рельефа в STL точная: {Fmt(S.ReliefMm)} мм."
+        : "Для оценки времени сначала обновите 3D-вид.";
+
+    private string ReliefText => S.ReliefUnit == ReliefUnit.Micron
+        ? ((int)Math.Round(S.ReliefMm * 1000)).ToString()
+        : Fmt(S.ReliefMm);
+
+    private string DepthGlobalText => S.ReliefUnit == ReliefUnit.Micron
+        ? ((int)Math.Round(S.ReliefMm * 1000)).ToString() + " мкм"
+        : Fmt(S.ReliefMm) + " мм";
+
+    private string DepthText(StampItem st) => st.DepthMm == null ? ""
+        : S.ReliefUnit == ReliefUnit.Micron
+            ? ((int)Math.Round(st.DepthMm.Value * 1000)).ToString()
+            : Fmt(st.DepthMm.Value);
+
+    private double BboxW(StampItem st) => LayoutSolver.RotatedBBox(st.Width, st.Height, st.RotationDeg).Bw;
+    private double BboxH(StampItem st) => LayoutSolver.RotatedBBox(st.Width, st.Height, st.RotationDeg).Bh;
+
+    private string QualityName => S.Quality switch { 1 => "черновик", 2 => "среднее", 3 => "высокое", _ => "ультра" };
+
+    private double WorkW { get { var wa = LayoutSolver.GetWorkArea(S.Plate); return wa.X1 - wa.X0; } }
+    private double WorkH { get { var wa = LayoutSolver.GetWorkArea(S.Plate); return wa.Y1 - wa.Y0; } }
+
+    private double MaxPosX(StampItem st)
+    {
+        var (bw, _) = LayoutSolver.RotatedBBox(st.Width, st.Height, st.RotationDeg);
+        return Math.Max(0, WorkW - bw);
+    }
+    private double MaxPosY(StampItem st)
+    {
+        var (_, bh) = LayoutSolver.RotatedBBox(st.Width, st.Height, st.RotationDeg);
+        return Math.Max(0, WorkH - bh);
+    }
+
+    private static string Fmt(double v) => v.ToString("0.###", System.Globalization.CultureInfo.InvariantCulture);
+}

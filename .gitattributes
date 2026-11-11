@@ -1,0 +1,11 @@
+* text=auto
+
+# Двоичные файлы — без преобразования переводов строк
+*.png binary
+*.jpg binary
+*.svg text
+*.ttf binary
+*.zip binary
+*.stampgen binary
+*.stl binary
+*.min.js binary

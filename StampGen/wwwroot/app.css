@@ -1,0 +1,607 @@
+/* StampGen — стили интерфейса.
+   © Guoud (iljamakeev@yandex.ru). Все права защищены. Условия: LICENSE.md. */
+
+html, body {
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+a, .btn-link {
+    color: #006bb7;
+}
+
+.btn-primary {
+    color: #fff;
+    background-color: #1b6ec2;
+    border-color: #1861ac;
+}
+
+.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+}
+
+.content {
+    padding-top: 1.1rem;
+}
+
+h1:focus {
+    outline: none;
+}
+
+.valid.modified:not([type=checkbox]) {
+    outline: 1px solid #26b050;
+}
+
+.invalid {
+    outline: 1px solid #e50000;
+}
+
+.validation-message {
+    color: #e50000;
+}
+
+.blazor-error-boundary {
+    background: url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTYiIGhlaWdodD0iNDkiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIG92ZXJmbG93PSJoaWRkZW4iPjxkZWZzPjxjbGlwUGF0aCBpZD0iY2xpcDAiPjxyZWN0IHg9IjIzNSIgeT0iNTEiIHdpZHRoPSI1NiIgaGVpZ2h0PSI0OSIvPjwvY2xpcFBhdGg+PC9kZWZzPjxnIGNsaXAtcGF0aD0idXJsKCNjbGlwMCkiIHRyYW5zZm9ybT0idHJhbnNsYXRlKC0yMzUgLTUxKSI+PHBhdGggZD0iTTI2My41MDYgNTFDMjY0LjcxNyA1MSAyNjUuODEzIDUxLjQ4MzcgMjY2LjYwNiA1Mi4yNjU4TDI2Ny4wNTIgNTIuNzk4NyAyNjcuNTM5IDUzLjYyODMgMjkwLjE4NSA5Mi4xODMxIDI5MC41NDUgOTIuNzk1IDI5MC42NTYgOTIuOTk2QzI5MC44NzcgOTMuNTEzIDI5MSA5NC4wODE1IDI5MSA5NC42NzgyIDI5MSA5Ny4wNjUxIDI4OS4wMzggOTkgMjg2LjYxNyA5OUwyNDAuMzgzIDk5QzIzNy45NjMgOTkgMjM2IDk3LjA2NTEgMjM2IDk0LjY3ODIgMjM2IDk0LjM3OTkgMjM2LjAzMSA5NC4wODg2IDIzNi4wODkgOTMuODA3MkwyMzYuMzM4IDkzLjAxNjIgMjM2Ljg1OCA5Mi4xMzE0IDI1OS40NzMgNTMuNjI5NCAyNTkuOTYxIDUyLjc5ODUgMjYwLjQwNyA1Mi4yNjU4QzI2MS4yIDUxLjQ4MzcgMjYyLjI5NiA1MSAyNjMuNTA2IDUxWk0yNjMuNTg2IDY2LjAxODNDMjYwLjczNyA2Ni4wMTgzIDI1OS4zMTMgNjcuMTI0NSAyNTkuMzEzIDY5LjMzNyAyNTkuMzEzIDY5LjYxMDIgMjU5LjMzMiA2OS44NjA4IDI1OS4zNzEgNzAuMDg4N0wyNjEuNzk1IDg0LjAxNjEgMjY1LjM4IDg0LjAxNjEgMjY3LjgyMSA2OS43NDc1QzI2Ny44NiA2OS43MzA5IDI2Ny44NzkgNjkuNTg3NyAyNjcuODc5IDY5LjMxNzkgMjY3Ljg3OSA2Ny4xMTgyIDI2Ni40NDggNjYuMDE4MyAyNjMuNTg2IDY2LjAxODNaTTI2My41NzYgODYuMDU0N0MyNjEuMDQ5IDg2LjA1NDcgMjU5Ljc4NiA4Ny4zMDA1IDI1OS43ODYgODkuNzkyMSAyNTkuNzg2IDkyLjI4MzcgMjYxLjA0OSA5My41Mjk1IDI2My41NzYgOTMuNTI5NSAyNjYuMTE2IDkzLjUyOTUgMjY3LjM4NyA5Mi4yODM3IDI2Ny4zODcgODkuNzkyMSAyNjcuMzg3IDg3LjMwMDUgMjY2LjExNiA4Ni4wNTQ3IDI2My41NzYgODYuMDU0N1oiIGZpbGw9IiNGRkU1MDAiIGZpbGwtcnVsZT0iZXZlbm9kZCIvPjwvZz48L3N2Zz4=) no-repeat 1rem/1.8rem, #b32121;
+    padding: 1rem 1rem 1rem 3.7rem;
+    color: white;
+}
+
+    .blazor-error-boundary::after {
+        content: "An error has occurred."
+    }
+
+.darker-border-checkbox.form-check-input {
+    border-color: #929292;
+}
+
+.form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
+    color: var(--bs-secondary-color);
+    text-align: end;
+}
+
+.form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
+    text-align: start;
+}
+/* ==================== StampGen ==================== */
+html, body {
+    height: 100%;
+    margin: 0;
+    font-size: 13px;
+    background: #eceff3;
+}
+
+.page-root, .app-root {
+    height: 100vh;
+    overflow: hidden;
+    /* v1.9: flex-колонка — иначе вложенный main не получает высоту, панели
+       не ограничены, их overflow-y не включается и колесо «нечего» листать */
+    display: flex;
+    flex-direction: column;
+}
+
+/* v1.9: main из MainLayout между page-root и содержимым страницы */
+.page-root > main {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+/* v1.9: оболочка страницы внутри Layout (меню-бар + рабочая область) */
+.app-shell {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+/* ==================== v1.8: меню-бар «как у взрослых программ» ==================== */
+/* (c) Guoud — iljamakeev@yandex.ru — несанкционированное коммерческое использование запрещено */
+.menubar {
+    height: 38px;
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    padding: 0 10px;
+    background: #fff;
+    border-bottom: 1px solid #d6dbe2;
+    position: relative;
+    z-index: 500;
+}
+.menu { position: relative; }
+.menu-btn {
+    border: none;
+    background: transparent;
+    padding: 6px 12px;
+    font-size: 13px;
+    color: #23324d;
+    border-radius: 6px;
+    cursor: pointer;
+}
+.menu-btn:hover, .menu-btn.open { background: #e8eefb; color: #173a7a; }
+.menu-drop {
+    position: absolute;
+    top: calc(100% + 2px);
+    left: 0;
+    min-width: 290px;
+    background: #fff;
+    border: 1px solid #d6dbe2;
+    border-radius: 8px;
+    box-shadow: 0 10px 28px rgba(15, 23, 42, .18);
+    padding: 4px;
+    z-index: 600;
+}
+.menu-item {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    width: 100%;
+    text-align: left;
+    border: none;
+    background: transparent;
+    padding: 7px 10px;
+    font-size: 12.5px;
+    color: #23324d;
+    border-radius: 6px;
+    cursor: pointer;
+    white-space: nowrap;
+}
+.menu-item:hover { background: #e8eefb; }
+.menu-item:disabled { color: #a7b0c0; cursor: default; }
+.menu-item:disabled:hover { background: transparent; }
+.menu-hint { margin-left: auto; font-size: 10.5px; color: #98a2b3; padding-left: 14px; }
+.menu-sep { height: 1px; background: #e2e6ee; margin: 4px 6px; }
+.menu-overlay { position: fixed; inset: 0; z-index: 400; }
+.menubar-title {
+    margin-left: 12px;
+    font-weight: 800;
+    color: #173a7a;
+    font-size: 13.5px;
+    letter-spacing: .3px;
+    white-space: nowrap;
+}
+.menubar-title .ver { color: #98a2b3; font-weight: 600; font-size: 11px; }
+.menubar-proj {
+    margin-left: auto;
+    font-size: 12px;
+    color: #5a6b85;
+    max-width: 30vw;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.app {
+    display: flex;
+    flex: 1;
+    min-height: 0;
+    gap: 6px;
+    padding: 6px;
+    box-sizing: border-box;
+}
+
+/* левая колонка: v1.8 — тянется под ширину окна (узкие экраны), но в разумных пределах */
+.left-col {
+    width: clamp(300px, 30vw, 410px);
+    min-width: 300px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding-right: 2px;
+}
+
+.section {
+    background: #fff;
+    border: 1px solid #d6dbe2;
+    border-radius: 8px;
+    padding: 8px 10px;
+    box-shadow: 0 1px 2px rgba(0,0,0,.05);
+}
+.section.grow { flex: 0 0 auto; }
+.section h6 {
+    margin: 0 0 6px 0;
+    font-weight: 700;
+    color: #23324d;
+    text-transform: uppercase;
+    letter-spacing: .4px;
+    font-size: 11.5px;
+}
+.subhead {
+    font-size: 11px;
+    color: #5a6b85;
+    margin: 8px 0 3px 0;
+    border-top: 1px dashed #d6dbe2;
+    padding-top: 6px;
+}
+
+.btn-row {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+.grid3 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 5px;
+    margin-bottom: 4px;
+}
+.grid3 label {
+    font-size: 11px;
+    color: #45536b;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+.hint { font-size: 10.5px; color: #7a8699; margin-top: 3px; line-height: 1.35; }
+.hint-inline { color: #7a8699; font-weight: 400; }
+.err { color: #b02a37; font-size: 11px; margin-top: 3px; }
+.panel {
+    background: #f4f7fb;
+    border: 1px solid #d6dbe2;
+    border-radius: 6px;
+    padding: 6px 8px;
+    margin-top: 5px;
+    font-size: 12px;
+}
+.proj-name { margin-bottom: 5px; }
+
+.slider-label { font-size: 11.5px; color: #34425c; margin-top: 4px; }
+.slider-label b { color: #173a7a; }
+input[type=range].slim { height: 18px; margin: 0; }
+.range-marks {
+    display: flex;
+    justify-content: space-between;
+    font-size: 9.5px;
+    color: #98a2b3;
+    margin-top: -2px;
+}
+
+.warnbox { background: #fff7df; border-color: #e5d38a; font-size: 11px; color: #7c650c; }
+
+/* карточки оттисков */
+.stamp-card {
+    border: 1px solid #d6dbe2;
+    border-radius: 6px;
+    margin-top: 5px;
+    background: #fbfcfe;
+    overflow: hidden;
+}
+.stamp-head {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 6px;
+    cursor: pointer;
+    user-select: none;
+}
+.stamp-head:hover { background: #eef2f8; }
+.chev { font-size: 9px; color: #64748b; width: 12px; }
+.thumb {
+    width: 26px;
+    height: 26px;
+    object-fit: contain;
+    background: #fff;
+    border: 1px solid #e2e6ee;
+    border-radius: 4px;
+    flex: 0 0 auto;
+}
+.stamp-name {
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 12px;
+    color: #23324d;
+}
+.stamp-size { font-size: 11px; color: #64748b; white-space: nowrap; }
+.btn-x {
+    border: none;
+    background: transparent;
+    color: #b02a37;
+    cursor: pointer;
+    font-size: 12px;
+    padding: 1px 5px;
+    border-radius: 4px;
+}
+.btn-x:hover { background: #f7d5d8; }
+.stamp-body {
+    padding: 2px 10px 8px 10px;
+    border-top: 1px dashed #d6dbe2;
+    background: #fff;
+}
+/* выбор/подсветка оттиска кликом по 2D-схеме */
+.stamp-card.sel { border-color: #e07b00; box-shadow: 0 0 0 1px rgba(224,123,0,.35); }
+.stamp-card.flash { animation: cardFlash 1.5s ease-out; }
+@keyframes cardFlash {
+    0% { background: #ffe9c7; border-color: #e07b00; }
+    100% { background: #fbfcfe; }
+}
+
+/* v1.3: мульти-выбор оттисков (галочки в карточках) */
+/* (c) Guoud — iljamakeev@yandex.ru — несанкционированное коммерческое использование запрещено */
+.stamp-card.batch { border-color: #1b6ec2; box-shadow: 0 0 0 1px rgba(27,110,194,.30); }
+.batch-chk { margin: 0; flex: 0 0 auto; width: 15px; height: 15px; cursor: pointer; }
+.batch-panel {
+    display: flex; align-items: center; gap: 8px; justify-content: space-between;
+    border-color: #9fc3ef; background: #eaf2ff; color: #1e4e8c;
+}
+#canvas2d { touch-action: none; }
+
+/* правая колонка */
+.right-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+}
+.view-toolbar {
+    background: #fff;
+    border: 1px solid #d6dbe2;
+    border-radius: 8px;
+    padding: 6px 10px;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+.tb-undo {
+    font-size: 15px;
+    line-height: 1;
+    padding: 2px 9px;
+}
+.q-label { white-space: nowrap; margin: 0 0 0 6px; }
+.q-range { max-width: 170px; min-width: 90px; flex: 1 1 120px; }
+.dirty { color: #b45309; font-size: 11px; margin-left: auto; white-space: nowrap; }
+
+.viewport {
+    flex: 1;
+    position: relative;
+    background: #fff;
+    border: 1px solid #d6dbe2;
+    border-radius: 8px;
+    overflow: hidden;
+    min-height: 0;
+}
+#canvas2d {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+#view3d { width: 100%; height: 100%; }
+
+/* модалки */
+.modal-back {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, .45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+.modal-card {
+    background: #fff;
+    border-radius: 10px;
+    width: 460px;
+    max-width: 95vw;
+    max-height: 92vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 18px 50px rgba(0,0,0,.3);
+}
+.modal-wide { width: 860px; }
+.modal-head {
+    padding: 10px 14px;
+    font-weight: 700;
+    color: #23324d;
+    border-bottom: 1px solid #e2e6ee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.modal-body {
+    padding: 10px 14px;
+    overflow-y: auto;
+    flex: 1;
+}
+.modal-foot {
+    padding: 8px 14px;
+    border-top: 1px solid #e2e6ee;
+    display: flex;
+    justify-content: flex-end;
+    gap: 6px;
+}
+
+/* сетка иконок */
+.icon-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, 54px);
+    gap: 5px;
+    max-height: 300px;
+    overflow-y: auto;
+    border: 1px solid #e2e6ee;
+    border-radius: 6px;
+    padding: 6px;
+    background: #fafbfe;
+    margin-top: 6px;
+}
+.icon-cell {
+    width: 54px;
+    height: 54px;
+    border: 2px solid transparent;
+    border-radius: 6px;
+    background: #fff;
+    cursor: pointer;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.icon-cell img { max-width: 50px; max-height: 50px; object-fit: contain; }
+.icon-cell:hover { border-color: #94b4e8; }
+.icon-cell.sel { border-color: #1b6ec2; background: #e8f1ff; }
+
+.chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    max-height: 90px;
+    overflow-y: auto;
+    margin-top: 4px;
+}
+.chip {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    border: 1px solid #d6dbe2;
+    border-radius: 20px;
+    padding: 2px 8px 2px 3px;
+    background: #eef4ff;
+    font-size: 11px;
+    max-width: 240px;
+}
+.chip img { width: 20px; height: 20px; object-fit: contain; background: #fff; border-radius: 3px; }
+.chip span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 160px; }
+
+.okbox {
+    background: #f0f9f1;
+    border: 1px solid #bfe3c6;
+    color: #1f6b2e;
+    font-size: 11px;
+    border-radius: 6px;
+    padding: 5px 8px;
+    margin-top: 5px;
+    max-height: 120px;
+    overflow-y: auto;
+}
+.msgbox {
+    background: #fff3f3;
+    border: 1px solid #f1c2c7;
+    color: #8c2f39;
+    font-size: 11px;
+    border-radius: 6px;
+    padding: 5px 8px;
+    margin-top: 5px;
+    max-height: 90px;
+    overflow-y: auto;
+}
+
+.relief-input { max-width: 120px; }
+
+/* ==== текстовые оттиски ==== */
+.thumb-text {
+    width: 26px;
+    height: 26px;
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #eef4ff;
+    border: 1px solid #c6d6f0;
+    border-radius: 4px;
+    color: #173a7a;
+    font-weight: 700;
+    font-size: 13px;
+}
+
+/* ==== автосохранение ==== */
+.autosave-status { white-space: nowrap; }
+.autosave-panel { border-color: #b7d3f5; background: #eef4ff; }
+.autosave-panel .btn-row { margin-top: 5px; }
+
+/* ==== анимация работы STL («программа не зависла») ==== */
+.stl-working {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    border: 1px solid #c9d8ee;
+    background: #f2f7ff;
+    border-radius: 8px;
+    padding: 10px;
+    margin-top: 8px;
+}
+.stl-working.active { animation: stlPulse 1.6s ease-in-out infinite; }
+@keyframes stlPulse {
+    0%, 100% { background: #f2f7ff; }
+    50% { background: #e6f0ff; }
+}
+.stl-spinner {
+    flex: 0 0 auto;
+    width: 34px;
+    height: 34px;
+    border: 4px solid #c9d8ee;
+    border-top-color: #1b6ec2;
+    border-radius: 50%;
+    animation: stlSpin 0.9s linear infinite;
+}
+@keyframes stlSpin { to { transform: rotate(360deg); } }
+.stl-work-info { flex: 1; min-width: 0; }
+.stl-phase { font-weight: 700; color: #173a7a; font-size: 12.5px; }
+.stl-elapsed { font-size: 11px; color: #6b4d0a; margin-top: 3px; }
+
+
+/* ==================== v1.6: 3D на сервере — предупреждение, оверлей, ошибка ==================== */
+/* (c) Guoud — iljamakeev@yandex.ru — несанкционированное коммерческое использование запрещено */
+/* v1.8: предупреждение — аккуратная строка под панелью вместо громоздкого жёлтого блока */
+.warn3d {
+    flex-basis: 100%;
+    margin-top: 2px;
+    padding: 4px 10px;
+    border: 1px solid #ecd9a0;
+    background: #fffaf0;
+    border-radius: 6px;
+    color: #8a6d1a;
+    font-size: 11.5px;
+    font-weight: 500;
+    line-height: 1.45;
+}
+.hint3d {
+    flex-basis: 100%;
+    margin-top: 2px;
+    color: #2563eb;
+    font-size: 11.5px;
+    font-weight: 500;
+}
+.view3d-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(241, 244, 248, 0.72);
+    backdrop-filter: blur(2px);
+    z-index: 30;
+}
+.ovl-card {
+    background: #ffffff;
+    border: 1.5px solid #c9d4e2;
+    border-radius: 12px;
+    box-shadow: 0 10px 34px rgba(23, 58, 122, 0.18);
+    padding: 16px 20px;
+    width: min(430px, 86%);
+    text-align: center;
+}
+.ovl-card .stl-spinner { margin: 0 auto 8px auto; }
+.ovl-title { font-weight: 800; color: #173a7a; font-size: 14.5px; }
+.ovl-phase { font-weight: 700; color: #0f6b34; font-size: 12.5px; margin-top: 4px; }
+.ovl-err { border-color: #e36464; }
+.ovl-err .ovl-title { color: #b3261e; }
+.ovl-err div { font-size: 12.5px; line-height: 1.5; }
+
+/* ==================== v1.8: разные разрешения ==================== */
+/* узкие окна: колонка уже, меню-подсказки скрыты, шапка компактнее */
+@media (max-width: 1100px) {
+    .left-col { width: clamp(272px, 32vw, 340px); min-width: 272px; }
+    .menu-hint { display: none; }
+    .menu-drop { min-width: 220px; }
+    .menubar-proj { display: none; }
+    .modal-wide { width: min(860px, 96vw); }
+}
+@media (max-width: 820px) {
+    html, body { font-size: 12.5px; }
+    .menubar-title { display: none; }
+    .q-range { max-width: 120px; }
+}
