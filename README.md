@@ -52,7 +52,6 @@
 |---|---|
 | [docs/INSTRUCTION.md](docs/INSTRUCTION.md) | Инструкция пользователя: запуск, интерфейс, библиотеки, рельеф, копии, экспорт STL/SVG/PDF/PNG/JPG, **как самому сделать библиотеку штампов**, ответы на частые вопросы. RU + EN. |
 | [BUILD-EXE.md](BUILD-EXE.md) | Сборка готового exe (self-contained): `build-exe.ps1` / `build-exe.sh`. |
-| [CHANGELOG.md](CHANGELOG.md) | История изменений v1.3 → v2.3.0. |
 
 ## ☕ Поддержать автора проекта
 
