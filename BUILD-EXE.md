@@ -35,19 +35,6 @@ dotnet publish StampGen\StampGen.csproj -c Release -r win-x64 -o publish\win-x64
 ./build-exe.sh          # linux-x64 (или поправьте RID на osx-x64 / osx-arm64)
 ```
 
-## 🔒 Обфускация (защита от реверс-инженеринга) — опционально
-
-Обычная сборка выше уже содержит базовую защиту: **single-file exe без PDB-файлов**
-(DebugType=none в Release — декомпиляция IL без отладочных символов заметно сложнее).
-
-Для усиленной защиты (переименование приватных типов/методов + шифрование строковых
-литералов) добавьте флаг `-Obfuscate` — используется свободный обфускатор
-[Obfuscar](https://github.com/obfuscar/Obfuscar) (MIT, настройки в `obfuscar.xml`):
-
-```powershell
-dotnet tool install --global Obfuscar.GlobalTool   # один раз
-.\build-exe.ps1 -Obfuscate
-```
 
 Что важно знать:
 
